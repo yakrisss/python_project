@@ -2,17 +2,17 @@ import settings
 import table
 
 def show_menu():
-    promt = """
+    prompt = """
         Menu:
         1. Search movies
         2. Top 5 most popular queries
         0. Exit
         Select a menu option (1, 2, or 0):
     """
-    return get_choice(promt, [0, 1, 2])
+    return get_choice(prompt, [0, 1, 2])
 
 def show_menu_movies():
-    promt = """
+    prompt = """
         Menu:
         1. Search movie by title
         2. Search movie by actors
@@ -21,12 +21,12 @@ def show_menu_movies():
         0. Exit
         Select a menu option (1, 2, 3, 4 or 0): 
     """
-    return get_choice(promt, [0, 1, 2, 3, 4])
+    return get_choice(prompt, [0, 1, 2, 3, 4])
 
-def get_choice(promt, choices):
+def get_choice(prompt, choices):
     while True:
         try:
-            choice = int(input(promt))
+            choice = int(input(prompt))
             if choice in choices:
                 return choice
             else:
@@ -46,13 +46,21 @@ def description_text():
 def genre_name():
     return input("Enter the genre: ").strip().lower()
 
+def input_year(prompt): #отдельная функция для проверки ввода года - чтоб избежать дублирования
+    while True:
+        try:
+            year = int(input(prompt).strip())
+            return year
+        except ValueError:
+            print("Invalid input. Please enter a valid year (numbers only).")
+
 def min_year():
-    return int(input("Enter the minimum release year: ").strip())
+    return input_year("Enter the minimum release year: ")
 
 def max_year():
-    return int(input("Enter the maximum release year: ").strip())
-
-def paginate_query(search_func, *args): #сама функция не имеет условия для поиска, имеет функию, к которой обтбор применятес внутри и аргументы
+    return input_year("Enter the maximum release year: ")
+            
+def paginate_query(search_func, *args): #пагинация - разбивание большого обьема данных на части, часть оптимизации
     offset = 0
     while True:
         data = search_func(*args, offset)

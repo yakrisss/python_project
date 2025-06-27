@@ -41,7 +41,7 @@ def connect_mongo():
         print(f"MongoDB: connection error — {e}")
         return None
 
-connection = connect_mysql() #проверка на подключение клиента для монго...проверка как и подкобчение к курсору sql будет в db
+connection = connect_mysql() #проверка на подключение клиента для монго...подкобчение к курсору sql будет в db
 client = connect_mongo()
 
 if client:

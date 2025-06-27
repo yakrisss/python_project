@@ -59,7 +59,7 @@ def main():
 
         elif choice == 2:
             top_searches = mongo_log.get_top_5_queries(5)
-            table.print_top_searches(top_searches)
+            mongo_log.print_top_5_queries(top_searches)
             continue
 
         elif choice == 0:
