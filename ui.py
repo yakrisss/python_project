@@ -52,7 +52,7 @@ def min_year():
 def max_year():
     return int(input("Enter the maximum release year: ").strip())
 
-def paginate_query(search_func, *args): #сама функция не имеет условия для поиска, имеет функию внутри и аргументы
+def paginate_query(search_func, *args): #сама функция не имеет условия для поиска, имеет функию, к которой обтбор применятес внутри и аргументы
     offset = 0
     while True:
         data = search_func(*args, offset)

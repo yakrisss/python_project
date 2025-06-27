@@ -11,7 +11,7 @@ def show_results(data):
     print(header_line)
     print("-" * len(header_line))
 
-    # переносы текста для рядов
+    # колонки с переносами, где надо
     for row in data:
         # разбиваю каждую ячейку на строки с переносом
         wrapped_cols = [
