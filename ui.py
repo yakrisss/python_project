@@ -4,12 +4,15 @@ Module ui.py
 User interface functions for movie search application.
 """
 
+from typing import List, Callable, Any
 import settings
 import table
 from logger import get_logger
 
+logger = get_logger(__name__)
 
-def show_menu():
+
+def show_menu() -> int:
     """
     Display the main menu and get user choice.
 
@@ -26,7 +29,7 @@ def show_menu():
     return get_choice(prompt, [0, 1, 2])
 
 
-def show_menu_movies():
+def show_menu_movies() -> int:
     """
     Display the movie search menu and get user choice.
 
@@ -45,13 +48,13 @@ def show_menu_movies():
     return get_choice(prompt, [0, 1, 2, 3, 4])
 
 
-def get_choice(prompt, choices) -> int:
+def get_choice(prompt: str, choices: List[int]) -> int:
     """
     Prompt the user to enter a valid choice from a list of options.
 
     Args:
         prompt (str): The input prompt message.
-        choices (list[int]): List of valid integer choices.
+        choices (List[int]): List of valid integer choices.
 
     Returns:
         int: The user's validated choice.
@@ -60,91 +63,67 @@ def get_choice(prompt, choices) -> int:
         try:
             choice = int(input(prompt))
             if choice in choices:
+                logger.info(f"User selected menu option: {choice}")
                 return choice
             print(f"Please enter one of the following numbers: {', '.join(map(str, choices))}")
         except ValueError:
             print("Invalid input. Please enter a number.")
 
 
-def film_name() -> str:
+def input_text(prompt: str) -> str:
     """
-    Prompt user to enter a movie title or part of it.
+    Universal text input function.
+    """
+    value = input(prompt).strip().lower()
+    logger.info(f"User input: '{value}' for prompt: '{prompt}'")
+    return value
 
-    Returns:
-        str: User input converted to lowercase and stripped of leading/trailing spaces.
-    """
-    return input("Enter the title of the movie or part of it: ").strip().lower()
+
+def film_name() -> str:
+    """Prompt for movie title or part of it."""
+    return input_text("Enter the title of the movie or part of it: ")
 
 
 def actor_name() -> str:
-    """
-    Prompt user to enter an actor or actress name (full or partial).
-
-    Returns:
-        str: User input converted to lowercase and stripped of leading/trailing spaces.
-    """
-    return input("Enter full or partial name of actor or actress: ").strip().lower()
+    """Prompt for actor name or part of it."""
+    return input_text("Enter full or partial name of actor or actress: ")
 
 
 def description_text() -> str:
-    """
-    Prompt user to enter a keyword from the movie description.
-
-    Returns:
-        str: User input converted to lowercase and stripped of leading/trailing spaces.
-    """
-    return input("Enter keyword from description: ").strip().lower()
+    """Prompt for description."""
+    return input_text("Enter keyword from description: ")
 
 
 def genre_name() -> str:
-    """
-    Prompt user to enter a movie genre.
-
-    Returns:
-        str: User input converted to lowercase and stripped of leading/trailing spaces.
-    """
-    return input("Enter the genre: ").strip().lower()
+    """Prompt for genre."""
+    return input_text("Enter the genre: ")
 
 
-def input_year(prompt) -> int:
+def input_year(prompt: str) -> int:
     """
     Prompt user to enter a valid year (integer).
-
-    Args:
-        prompt (str): The input prompt message.
-
-    Returns:
-        int: Validated year entered by the user.
     """
     while True:
         try:
             year = int(input(prompt).strip())
+            logger.info(f"User entered year: {year} for prompt: {prompt}")
             return year
         except ValueError:
             print("Invalid input. Please enter a valid year (numbers only).")
 
 
 def min_year() -> int:
-    """
-    Prompt user to enter the minimum release year.
-
-    Returns:
-        int: Validated minimum year.
-    """
+    """Prompt for minimum release year."""
     return input_year("Enter the minimum release year: ")
 
 
 def max_year() -> int:
-    """
-    Prompt user to enter the maximum release year.
-
-    Returns:
-        int: Validated maximum year.
-    """
+    """Prompt for maximum release year."""
     return input_year("Enter the maximum release year: ")
 
+
 #пагинация - разбивание большого обьема данных на части, часть оптимизации
-def paginate_query(search_func, *args):
+def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
     """
     Perform paginated querying and show results in chunks.
 
@@ -174,3 +153,39 @@ def paginate_query(search_func, *args):
         if more != 'yes':
             break
         offset += settings.MOVIE_RESULT_LIMIT
+
+def show_available_genres(genres: dict) -> None: #для вывода и выбора жанров
+    """
+    Print available genres from dict {genre_name: id}.
+    """
+    print("Available genres:")
+    for g in genres:
+        print(f" - {g}")
+    return None
+
+def show_year_range(year_min: int, year_max: int) -> None: #для выбора и выводы годов
+    """
+    Print available year range.
+    """
+    print(f"Available release years: from {year_min} to {year_max}")
+
+
+def invalid_genre_message() -> None:
+    """
+    Print invalid genre message.
+    """
+    print("Invalid genre. Please choose from the list.")
+
+
+def invalid_year_range_message(year_min: int, year_max: int) -> None:
+    """
+    Print invalid year range message.
+    """
+    print(f"Please enter valid years between {year_min} and {year_max}, and min_year <= max_year")
+
+
+def show_message(message: str) -> None: #функция для печатания сообщений, общая
+    """
+    General print wrapper for any single message.
+    """
+    print(message)

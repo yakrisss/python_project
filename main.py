@@ -5,70 +5,64 @@ import table
 from logger import get_logger
 
 
-
 def main():
     movie_db = db.MovieDB()
 
     while True:
         choice = ui.show_menu()
 
-        if choice == 1:  # Поиск фильма
-            movie_choice = ui.show_menu_movies()
+        match choice:
+            case 1:
+                handle_movie_search(movie_db)
 
-            if movie_choice == 1:
-                name = ui.film_name()
-                ui.paginate_query(movie_db.search_film_by_name, name)
+            case 2:
+                top_searches = mongo_log.get_top_5_queries(5)
+                ui.show_top_searches(top_searches)
 
-            elif movie_choice == 2:
-                name = ui.actor_name()
-                ui.paginate_query(movie_db.search_film_by_actor, name)
+            case 0:
+                ui.show_message("Exit")
+                break
 
-            elif movie_choice == 3:
-                desc = ui.description_text()
-                ui.paginate_query(movie_db.search_film_by_description, desc)
+            case _:
+                ui.show_message("Invalid choice")
 
-            elif movie_choice == 4:
-                genres = movie_db.query_all_genres()
-                print("Available genres:")
-                for g in genres:
-                    print(f" - {g}")
 
-                year_min, year_max = movie_db.query_min_max_year()
-                print(f"Available release years: from {year_min} to {year_max}")
+def handle_movie_search(movie_db: db.MovieDB) -> None:
+    """
+    Handle menu movie search
+    """
+    movie_choice = ui.show_menu_movies()
 
-                genre_input = ui.genre_name() #убрать регистрозависимость
-                while genre_input not in genres:
-                    print("Invalid genre. Please choose from the list.")
-                    genre_input = ui.genre_name()
-                genre = genres[genre_input]
+    match movie_choice:
+        case 1:
+            name = ui.film_name()
+            ui.paginate_query(movie_db.search_film_by_name, name)
 
-                while True:
-                    min_year = ui.min_year()
-                    max_year = ui.max_year()
-                    if min_year < year_min or max_year > year_max or min_year > max_year:
-                        print(f"Please enter valid years between {year_min} and {year_max}, and min_year <= max_year")
-                    else:
-                        break
+        case 2:
+            name = ui.actor_name()
+            ui.paginate_query(movie_db.search_film_by_actor, name)
 
-                ui.paginate_query(movie_db.search_film_by_genre_and_year, genre, min_year, max_year)
+        case 3:
+            desc = ui.description_text()
+            ui.paginate_query(movie_db.search_film_by_description, desc)
 
-            elif movie_choice == 0:
-                continue
+        case 4:
+            genres = movie_db.query_all_genres()
+            genre = ui.prompt_genre(genres)  
 
-            else:
-                print("Invalid choice in the movie menu")
+            year_min, year_max = movie_db.query_min_max_year()
+            ui.show_year_range(year_min, year_max)
 
-        elif choice == 2:
-            top_searches = mongo_log.get_top_5_queries(5)
-            mongo_log.print_top_5_queries(top_searches)
-            continue
+            min_year, max_year = ui.prompt_year_range(year_min, year_max)
 
-        elif choice == 0:
-            print("Exit")
-            break
+            ui.paginate_query(movie_db.search_film_by_genre_and_year, genre, min_year, max_year)
 
-        else:
-            print("Invalid choice")
+        case 0:
+            pass
+
+        case _:
+            ui.show_message("Invalid choice in the movie menu")
+
 
 if __name__ == "__main__":
     main()
