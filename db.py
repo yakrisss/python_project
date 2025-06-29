@@ -8,28 +8,27 @@ logger = get_logger(__name__)
 
 
 class MovieDB:
-    def __init__(self):
-        self.connection = settings.connection
+    def __init__(self, conn, cursor):
+        self.connection = conn
+        self.cursor = cursor
         self.limit = settings.MOVIE_RESULT_LIMIT
-        logger.info("MovieDB initialized with limit=%d", self.limit) #запись в лог об иницилизации
+        logger.info("MovieDB initialized with limit=%d", self.limit)
 
     def query(self, query, params=None):
-        with self.connection.cursor() as cursor:
-            try:
-                if params:
-                    #записывает запрос и параметры
-                    logger.debug("Executing query: %s with params: %s", query, params)
-                    cursor.execute(query, params)
-                else:
-                    logger.debug("Executing query: %s", query)
-                    cursor.execute(query)
-                    
-                result = cursor.fetchall()
-                logger.debug("Query executed successfully, fetched %d rows", len(result))
-                return result
-            except Exception as e:
-                logger.error("Error executing query: %s; Exception: %s", query, e)
-                return []
+        try:
+            if params:
+                logger.debug("Executing query: %s with params: %s", query, params)
+                self.cursor.execute(query, params)
+            else:
+                logger.debug("Executing query: %s", query)
+                self.cursor.execute(query)
+                
+            result = self.cursor.fetchall()
+            logger.debug("Query executed successfully, fetched %d rows", len(result))
+            return result
+        except Exception as e:
+            logger.error("Error executing query: %s; Exception: %s", query, e)
+            return []
     
     def search_film_by_name(self, film_name, offset=0):
         logger.info("Search film by name: '%s', offset: %d", film_name, offset)

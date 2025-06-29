@@ -34,6 +34,8 @@ def show_results(data):
 def print_top_searches(data):
     print("Most frequent search queries:")
     for i, item in enumerate(data, start=1):
-        print(f"{i}. {item['_id']} — {item['count']} times")
-
-    
+        _id = item.get('_id', {})
+        query_type = _id.get('query_type', 'unknown')
+        query_str = _id.get('query_str', '')
+        count = item.get('count', 0)
+        print(f"{i}. Query - {query_type} by keyword {query_str} - {count} time{'s' if count != 1 else ''}")   

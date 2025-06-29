@@ -6,7 +6,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s",
     handlers=[
         logging.FileHandler("app.log", encoding="utf-8"),  # Write logs to file
-        logging.StreamHandler()  # Also output logs to console
     ]
 )
 

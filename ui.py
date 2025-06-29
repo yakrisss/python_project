@@ -169,7 +169,14 @@ def show_year_range(year_min: int, year_max: int) -> None: #для выбора 
     """
     print(f"Available release years: from {year_min} to {year_max}")
 
+def show_top_searches(data):
+    print("\nTop 5 most popular queries:")
+    if not data:
+        print("No queries yet.")
+    else:
+        table.print_top_searches(data)
 
+            
 def invalid_genre_message() -> None:
     """
     Print invalid genre message.
