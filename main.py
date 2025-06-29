@@ -15,6 +15,7 @@ def main():
         logger.error("MySQL connection is not available.")
         return
     
+    mysql_cursor = None
     try:
         mysql_cursor = mysql_conn.cursor()
     except Exception as e:
@@ -27,9 +28,12 @@ def main():
     if mongo_client is None or mongo_collection is None:
         ui.show_message("MongoDB connection or collection is not available.")
         logger.error("MongoDB connection or collection is not available.")
-        mysql_cursor.close()
-        mysql_conn.close() #закрыть соединения sql если нет соединения с монго
+        if mysql_cursor is not None:
+            mysql_cursor.close() #закрыть соединения 
+        if mysql_conn is not None and mysql_conn.open:
+            mysql_conn.close()
         return
+
 
     movie_db = db.MovieDB(mysql_conn, mysql_cursor)
 
@@ -52,14 +56,20 @@ def main():
                 case _:
                     ui.show_message("Invalid choice")
 
+    except Exception as e:
+        #неожиданные ошибки внутри цикла
+        ui.show_message(f"Unexpected error: {e}")
+        logger.error(f"Unexpected error: {e}")
+        
     finally:
-        #закрытие соединения поле нажати 0 
+        #гарантированное закрытие в любом случае
         if mysql_cursor is not None:
             mysql_cursor.close()
         if mysql_conn is not None and mysql_conn.open:
             mysql_conn.close()
         if mongo_client is not None:
             mongo_client.close()
+        logger.info("All connections closed.")
 
 
 def handle_movie_search(movie_db: db.MovieDB) -> None:

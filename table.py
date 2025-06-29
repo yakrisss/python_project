@@ -1,6 +1,34 @@
-import textwrap
+"""
+Module for displaying formatted tabular data and printing search query statistics.
 
-def show_results(data):
+Functions:
+- show_results(data: List[List[Any]]) -> None:
+    Displays tabular data with automatic text wrapping inside table cells.
+
+- print_top_searches(data: List[Dict[str, Any]]) -> None:
+    Prints a ranked list of the most frequent search queries from given data.
+
+This module is useful for formatting console output when working with
+search results, reports, or logs that require readable multi-line columns.
+"""
+
+
+import textwrap
+from typing import List, Dict, Any
+
+
+def show_results(data: List[List[Any]]) -> None:
+    """
+    Display tabular data with wrapped text inside cells.
+
+    Each row is printed with columns aligned and wrapped to the specified width.
+
+    Args:
+        data (List[List[Any]]): List of rows, where each row is a list of cell values.
+
+    Returns:
+        None
+    """
     headers = ["ID", "Title", "Year", "Genre", "Actors", "Price", "Description"]
     widths = [5, 20, 7, 12, 30, 8, 38]  # ширина колонок
 
@@ -31,7 +59,17 @@ def show_results(data):
             print(line)
 
 
-def print_top_searches(data):
+def print_top_searches(data: List[Dict[str, Any]]) -> None:
+    """
+    Print the most frequent search queries.
+
+    Args:
+        data (List[Dict[str, Any]]): List of dictionaries containing search query info,
+            each with keys '_id' and 'count'. '_id' is a dict with 'query_type' and 'query_str'.
+
+    Returns:
+        None
+    """
     print("Most frequent search queries:")
     for i, item in enumerate(data, start=1):
         _id = item.get('_id', {})

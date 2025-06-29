@@ -50,9 +50,7 @@ def get_mongo_collection(client):
         logger.warning("MongoDB: client is None — cannot get collection")
         return None
 
-
-# --- Initialize connections at import time ---
-
+#запуск соединения
 try:
     mysql_connection = connect_mysql()
 except ConnectionError as e:
