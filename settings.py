@@ -17,10 +17,14 @@ DATABASE_MYSQL = {
     'charset': 'utf8mb4'
 }
 
+MONGO_USER = os.getenv('MONGO_USER')
+MONGO_PASSWORD = os.getenv('MONGO_PASSWORD')
+MONGO_HOST = os.getenv('MONGO_HOST')
+MONGO_DB = os.getenv('MONGO_DB')
+
 DATABASE_MONGO = (
-    "mongodb://ich_editor:verystrongpassword"
-    "@mongo.itcareerhub.de/?readPreference=primary"
-    "&ssl=false&authMechanism=DEFAULT&authSource=ich_edit"
+    f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}/"
+    f"?readPreference=primary&ssl=false&authMechanism=DEFAULT&authSource={MONGO_DB}"
 )
 
 MOVIE_RESULT_LIMIT = 10
