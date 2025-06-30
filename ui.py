@@ -8,6 +8,8 @@ from typing import List, Callable, Any
 import settings
 import table
 from logger import get_logger
+from exceptions import UserExit
+
 
 logger = get_logger(__name__)
 
@@ -20,7 +22,7 @@ def show_menu() -> int:
         int: Selected menu option (0, 1, or 2).
     """
     prompt = """
-        Menu:
+        MENU:
         1. Search movies
         2. Top 5 most popular queries
         0. Exit
@@ -37,7 +39,7 @@ def show_menu_movies() -> int:
         int: Selected menu option (0, 1, 2, 3, or 4).
     """
     prompt = """
-        Menu:
+        MENU:
         1. Search movie by title
         2. Search movie by actors
         3. Search movie by description
@@ -68,7 +70,7 @@ def get_choice(prompt: str, choices: List[int]) -> int:
             print(f"Please enter one of the following numbers: {', '.join(map(str, choices))}")
         except ValueError:
             print("Invalid input. Please enter a number.")
-
+            
 
 def input_text(prompt: str) -> str:
     """
@@ -76,27 +78,28 @@ def input_text(prompt: str) -> str:
     """
     value = input(prompt).strip().lower()
     logger.info(f"User input: '{value}' for prompt: '{prompt}'")
+    if value == '0':
+        raise UserExit()
     return value
-
 
 def film_name() -> str:
     """Prompt for movie title or part of it."""
-    return input_text("Enter the title of the movie or part of it: ")
+    return input_text("Enter the title of the movie or part of it (or 0 for back to previous menu): ")
 
 
 def actor_name() -> str:
     """Prompt for actor name or part of it."""
-    return input_text("Enter full or partial name of actor or actress: ")
+    return input_text("Enter full or partial name of actor or actress (or 0 for back to previous menu): ")
 
 
 def description_text() -> str:
     """Prompt for description."""
-    return input_text("Enter keyword from description: ")
+    return input_text("Enter keyword from description (or 0 for back to previous menu): ")
 
 
 def genre_name() -> str:
     """Prompt for genre."""
-    return input_text("Enter the genre: ")
+    return input_text("Enter the genre (or 0 for back to previous menu): ")
 
 
 def input_year(prompt: str) -> int:
@@ -104,22 +107,28 @@ def input_year(prompt: str) -> int:
     Prompt user to enter a valid year (integer).
     """
     while True:
+        value = input(f"{prompt} (or 0 for back to previous menu): ").strip()
+        if value == '0':
+            raise UserExit
         try:
-            year = int(input(prompt).strip())
+            year = int(value)
             logger.info(f"User entered year: {year} for prompt: {prompt}")
             return year
         except ValueError:
             print("Invalid input. Please enter a valid year (numbers only).")
 
 
-def min_year() -> int:
-    """Prompt for minimum release year."""
-    return input_year("Enter the minimum release year: ")
-
-
-def max_year() -> int:
-    """Prompt for maximum release year."""
-    return input_year("Enter the maximum release year: ")
+def prompt_year_range(year_min: int, year_max: int) -> tuple[int, int]:
+    """
+    Prompt user to input valid min and max year in the given range.
+    Returns a tuple (min_year, max_year).
+    """
+    while True:
+        min_y = input_year(f"Enter the minimum release year (from {year_min}): ")
+        max_y = input_year(f"Enter the maximum release year (up to {year_max}): ")
+        if year_min <= min_y <= max_y <= year_max:
+            return min_y, max_y
+        invalid_year_range_message(year_min, year_max)
 
 
 #пагинация - разбивание большого обьема данных на части, часть оптимизации
@@ -149,10 +158,15 @@ def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
         if len(data) < settings.MOVIE_RESULT_LIMIT:
             print("End of results.")
             break
-        more = input("Show next 10? (yes/no): ").strip().lower()
-        if more != 'yes':
+        more = input("Show next 10? (yes/no, or 0 to return to menu): ").strip().lower()
+        if more == 'yes':
+            offset += settings.MOVIE_RESULT_LIMIT
+        elif more == 'no' or more == '0':
+            print("Returning to the main menu.")
             break
-        offset += settings.MOVIE_RESULT_LIMIT
+        else:
+            print("Invalid input. Returning to the main menu.")
+            break
 
 def prompt_genre_choice(genres: dict) -> str:
     """
@@ -160,7 +174,7 @@ def prompt_genre_choice(genres: dict) -> str:
     """
     while True:
         show_available_genres(genres)
-        genre_input = input_text("Enter the genre: ")
+        genre_input = input_text("Enter the genre (or 0 for back to previous menu): ")
         if genre_input in genres:
             return genres[genre_input]
         invalid_genre_message()
@@ -182,18 +196,6 @@ def show_year_range(year_min: int, year_max: int) -> None: #для выбора 
     print(f"Available release years: from {year_min} to {year_max}")
 
 
-def prompt_year_range(year_min: int, year_max: int) -> tuple[int, int]:
-    """
-    Prompt user to input valid min and max year in the given range.
-    Returns a tuple (min_year, max_year).
-    """
-    while True:
-        min_y = input_year(f"Enter the minimum release year (from {year_min}): ")
-        max_y = input_year(f"Enter the maximum release year (up to {year_max}): ")
-        if year_min <= min_y <= max_y <= year_max:
-            return min_y, max_y
-        invalid_year_range_message(year_min, year_max)
-
 def show_top_searches(data):
     print("\nTop 5 most popular queries:")
     if not data:
@@ -201,7 +203,7 @@ def show_top_searches(data):
     else:
         table.print_top_searches(data)
 
-            
+
 def invalid_genre_message() -> None:
     """
     Print invalid genre message.

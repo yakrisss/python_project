@@ -4,6 +4,9 @@ import ui
 import logger
 import mongo_log
 import table
+from exceptions import UserExit
+
+
 
 logger = logger.get_logger(__name__)
 
@@ -43,7 +46,10 @@ def main():
 
             match choice:
                 case 1:
-                    handle_movie_search(movie_db)
+                    try:
+                        handle_movie_search(movie_db)
+                    except ui.UserExit:  # ДОБАВЛЕНО: ловим исключение выхода из поиска фильмов
+                        ui.show_message("Returning to main menu...")
 
                 case 2:
                     top_searches = mongo_log.get_top_5_queries(5)
@@ -78,36 +84,45 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
     """
     movie_choice = ui.show_menu_movies()
 
-    match movie_choice:
-        case 1:
-            name = ui.film_name()
-            ui.paginate_query(movie_db.search_film_by_name, name)
+    try:
+        match movie_choice:
+            case 1:
+                name = ui.film_name()
+                if name is None:  #ДОБАВЛЕНО: выход по '0' из input_text
+                    raise ui.UserExit()
+                ui.paginate_query(movie_db.search_film_by_name, name)
 
-        case 2:
-            name = ui.actor_name()
-            ui.paginate_query(movie_db.search_film_by_actor, name)
+            case 2:
+                name = ui.actor_name()
+                if name is None:
+                    raise ui.UserExit()
+                ui.paginate_query(movie_db.search_film_by_actor, name)
 
-        case 3:
-            desc = ui.description_text()
-            ui.paginate_query(movie_db.search_film_by_description, desc)
+            case 3:
+                desc = ui.description_text()
+                if desc is None:
+                    raise ui.UserExit()
+                ui.paginate_query(movie_db.search_film_by_description, desc)
 
-        case 4:
-            genres = movie_db.query_all_genres()
-            genre = ui.prompt_genre_choice(genres)
+            case 4:
+                genres = movie_db.query_all_genres()
+                genre = ui.prompt_genre_choice(genres)
+                if genre is None:
+                    raise ui.UserExit()
 
-            year_min, year_max = movie_db.query_min_max_year()
-            ui.show_year_range(year_min, year_max)
+                year_min, year_max = movie_db.query_min_max_year()
+                ui.show_year_range(year_min, year_max)
 
-            min_year, max_year = ui.prompt_year_range(year_min, year_max)
+                min_year, max_year = ui.prompt_year_range(year_min, year_max)
+                if min_year is None or max_year is None:
+                    raise ui.UserExit()
 
-            ui.paginate_query(movie_db.search_film_by_genre_and_year, genre, min_year, max_year)
+                ui.paginate_query(movie_db.search_film_by_genre_and_year, genre, min_year, max_year)
 
-        case 0:
-            pass
-
-        case _:
-            ui.show_message("Invalid choice in the movie menu")
-
+    except ui.UserExit:
+        ui.show_message("Returning to previous menu...")
+        # Возврат в меню поиска фильмов
+        return
 
 if __name__ == "__main__":
     main()

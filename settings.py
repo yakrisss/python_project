@@ -1,13 +1,18 @@
 import pymysql
 import pymongo
 import logging
+from dotenv import load
+import os
+
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 DATABASE_MYSQL = {
-    'host': 'ich-db.edu.itcareerhub.de',
-    'user': 'ich1',
-    'password': 'password',
+    'host': os.getenv('MYSQL_HOST'),
+    'user': os.getenv('MYSQL_USER'),
+    'password': os.getenv('MYSQL_PASSWORD'),
     'database': 'sakila',
     'charset': 'utf8mb4'
 }
