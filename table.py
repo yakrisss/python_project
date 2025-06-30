@@ -30,9 +30,7 @@ def show_results(data: List[List[Any]]) -> None:
         None
     """
     headers = ["ID", "Title", "Year", "Genre", "Actors", "Price", "Description"]
-    widths = [5, 20, 7, 12, 30, 8, 38]  # ширина колонок
-
-    # заголовок
+    widths = [5, 20, 7, 12, 30, 8, 38]
     header_line = ""
     for h, w in zip(headers, widths):
         header_line += h.ljust(w) + " "
@@ -76,4 +74,7 @@ def print_top_searches(data: List[Dict[str, Any]]) -> None:
         query_type = _id.get('query_type', 'unknown')
         query_str = _id.get('query_str', '')
         count = item.get('count', 0)
-        print(f"{i}. Query - {query_type} by keyword {query_str} - {count} time{'s' if count != 1 else ''}")   
+        time_word = 'times' if count != 1 else 'time'
+        print(f"{i}. Query - {query_type} by keyword {query_str} - {count} {time_word}")
+
+    

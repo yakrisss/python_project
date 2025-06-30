@@ -154,6 +154,18 @@ def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
             break
         offset += settings.MOVIE_RESULT_LIMIT
 
+def prompt_genre_choice(genres: dict) -> str:
+    """
+    Prompt user to enter a genre from the available list.
+    """
+    while True:
+        show_available_genres(genres)
+        genre_input = input_text("Enter the genre: ")
+        if genre_input in genres:
+            return genres[genre_input]
+        invalid_genre_message()
+
+
 def show_available_genres(genres: dict) -> None: #для вывода и выбора жанров
     """
     Print available genres from dict {genre_name: id}.
@@ -168,6 +180,19 @@ def show_year_range(year_min: int, year_max: int) -> None: #для выбора 
     Print available year range.
     """
     print(f"Available release years: from {year_min} to {year_max}")
+
+
+def prompt_year_range(year_min: int, year_max: int) -> tuple[int, int]:
+    """
+    Prompt user to input valid min and max year in the given range.
+    Returns a tuple (min_year, max_year).
+    """
+    while True:
+        min_y = input_year(f"Enter the minimum release year (from {year_min}): ")
+        max_y = input_year(f"Enter the maximum release year (up to {year_max}): ")
+        if year_min <= min_y <= max_y <= year_max:
+            return min_y, max_y
+        invalid_year_range_message(year_min, year_max)
 
 def show_top_searches(data):
     print("\nTop 5 most popular queries:")
@@ -188,7 +213,9 @@ def invalid_year_range_message(year_min: int, year_max: int) -> None:
     """
     Print invalid year range message.
     """
-    print(f"Please enter valid years between {year_min} and {year_max}, and min_year <= max_year")
+    print(f"Error: Please enter years between {year_min} and {year_max}, "
+          "and make sure the minimum year is not greater than the maximum year.")
+    print("Try again.\n")
 
 
 def show_message(message: str) -> None: #функция для печатания сообщений, общая

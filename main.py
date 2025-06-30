@@ -93,7 +93,7 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
 
         case 4:
             genres = movie_db.query_all_genres()
-            genre = ui.prompt_genre(genres)
+            genre = ui.prompt_genre_choice(genres)
 
             year_min, year_max = movie_db.query_min_max_year()
             ui.show_year_range(year_min, year_max)
