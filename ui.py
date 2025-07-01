@@ -5,9 +5,10 @@ User interface functions for movie search application.
 """
 
 from typing import List, Callable, Any
-import settings
+
+import settings # application configuration and DB connection settings
 import table
-from logger import get_logger
+from logger import get_logger # custom logging utility
 from exceptions import UserExit
 
 
@@ -65,26 +66,38 @@ def get_choice(prompt: str, choices: List[int]) -> int:
         try:
             choice = int(input(prompt))
             if choice in choices:
-                logger.info(f"User selected menu option: {choice}")
+                logger.info("User selected menu option: %s", choice)
                 return choice
             print(f"Please enter one of the following numbers: {', '.join(map(str, choices))}")
         except ValueError:
             print("Invalid input. Please enter a number.")
-            
+
 
 def input_text(prompt: str) -> str:
     """
-    Universal text input function.
+    Prompt the user to input text, strip it, and convert to lowercase.
+
+    Args:
+        prompt (str): The input prompt message.
+
+    Raises:
+        UserExit: If the user inputs '0'.
+
+    Returns:
+        str: The user's input text.
     """
     value = input(prompt).strip().lower()
-    logger.info(f"User input: '{value}' for prompt: '{prompt}'")
+    logger.info("User input: '%s' for prompt: '%s'", value, prompt)
     if value == '0':
         raise UserExit()
     return value
 
+
 def film_name() -> str:
     """Prompt for movie title or part of it."""
-    return input_text("Enter the title of the movie or part of it (or 0 for back to previous menu): ")
+    return input_text(
+        "Enter the title of the movie or part of it (or 0 for back to previous menu): "
+    )
 
 
 def actor_name() -> str:
@@ -112,7 +125,7 @@ def input_year(prompt: str) -> int:
             raise UserExit
         try:
             year = int(value)
-            logger.info(f"User entered year: {year} for prompt: {prompt}")
+            logger.info("User entered year: %d for prompt: %s", year, prompt)
             return year
         except ValueError:
             print("Invalid input. Please enter a valid year (numbers only).")
@@ -121,7 +134,13 @@ def input_year(prompt: str) -> int:
 def prompt_year_range(year_min: int, year_max: int) -> tuple[int, int]:
     """
     Prompt user to input valid min and max year in the given range.
-    Returns a tuple (min_year, max_year).
+
+    Args:
+        year_min (int): The minimum valid year.
+        year_max (int): The maximum valid year.
+
+    Returns:
+        tuple[int, int]: A tuple (min_year, max_year) within the specified range
     """
     while True:
         min_y = input_year(f"Enter the minimum release year (from {year_min}): ")
@@ -131,7 +150,6 @@ def prompt_year_range(year_min: int, year_max: int) -> tuple[int, int]:
         invalid_year_range_message(year_min, year_max)
 
 
-#пагинация - разбивание большого обьема данных на части, часть оптимизации
 def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
     """
     Perform paginated querying and show results in chunks.
@@ -143,9 +161,6 @@ def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
     Behavior:
         Fetches results in batches defined by settings.MOVIE_RESULT_LIMIT,
         displays them, and asks the user whether to fetch more results.
-
-    Returns:
-        None
     """
     offset = 0
     while True:
@@ -154,14 +169,14 @@ def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
             print("No results")
             break
 
-        table.show_results(data) # функция печати, чтоб облегчить написание в main
+        table.show_results(data)
         if len(data) < settings.MOVIE_RESULT_LIMIT:
             print("End of results.")
             break
-        more = input("Show next 10? (yes/no, or 0 to return to menu): ").strip().lower()
+        more = input("Show next 10? (yes or to return to menu no or 0): ").strip().lower()
         if more == 'yes':
             offset += settings.MOVIE_RESULT_LIMIT
-        elif more == 'no' or more == '0':
+        elif more in ('no', '0'):
             print("Returning to the main menu.")
             break
         else:
@@ -171,6 +186,15 @@ def paginate_query(search_func: Callable[..., List[Any]], *args: Any) -> None:
 def prompt_genre_choice(genres: dict) -> str:
     """
     Prompt user to enter a genre from the available list.
+
+    Args:
+        genres (dict): Dictionary of available genres with {genre_name: id}.
+
+    Raises:
+        UserExit: If the user inputs '0'.
+
+    Returns:
+        str: The selected genre ID.
     """
     while True:
         show_available_genres(genres)
@@ -180,23 +204,36 @@ def prompt_genre_choice(genres: dict) -> str:
         invalid_genre_message()
 
 
-def show_available_genres(genres: dict) -> None: #для вывода и выбора жанров
+def show_available_genres(genres: dict) -> None:
     """
     Print available genres from dict {genre_name: id}.
+
+    Args:
+        genres (dict): Dictionary of available genres..
     """
     print("Available genres:")
     for g in genres:
         print(f" - {g}")
-    return None
 
-def show_year_range(year_min: int, year_max: int) -> None: #для выбора и выводы годов
+
+def show_year_range(year_min: int, year_max: int) -> None:
     """
     Print available year range.
+
+    Args:
+        year_min (int): Minimum available year.
+        year_max (int): Maximum available year.
     """
     print(f"Available release years: from {year_min} to {year_max}")
 
 
-def show_top_searches(data):
+def show_top_searches(data) -> None:
+    """
+    Display top 5 most popular queries.
+
+    Args:
+        data: Data containing top search queries.
+    """
     print("\nTop 5 most popular queries:")
     if not data:
         print("No queries yet.")
@@ -220,8 +257,11 @@ def invalid_year_range_message(year_min: int, year_max: int) -> None:
     print("Try again.\n")
 
 
-def show_message(message: str) -> None: #функция для печатания сообщений, общая
+def show_message(message: str) -> None:
     """
     General print wrapper for any single message.
+
+    Args:
+        message (str): The message to print.
     """
     print(message)

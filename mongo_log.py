@@ -1,6 +1,20 @@
-from datetime import datetime
-import settings
+"""
+Logs movie search queries to MongoDB and retrieves top queries.
+
+Features:
+- Log queries with type, string, and timestamp.
+- Fetch top N frequent queries.
+- Print formatted query statistics.
+
+Depends on settings.mongo_collection and logging.
+"""
+
+
 import logging
+from datetime import datetime
+from typing import List, Dict, Any, Optional
+
+import settings # application configuration and DB connection settings
 
 
 logger = logging.getLogger(__name__)
@@ -9,9 +23,13 @@ logger = logging.getLogger(__name__)
 collection = settings.mongo_collection
 
 
-def log_create(query_type, query_str):
+def log_create(query_type: str, query_str: str) -> None:
     """
-    Insert a log document into MongoDB collection.
+    Insert a log document into the MongoDB collection.
+
+    Args:
+        query_type (str): The type/category of the query (e.g., 'film_name', 'actor').
+        query_str (str): The query string that was searched.
     """
     if collection is None:
         logger.warning("MongoDB: collection is None — cannot write log")
@@ -29,9 +47,18 @@ def log_create(query_type, query_str):
         logger.error(f"Error writing log to MongoDB: {e}")
 
 
-def get_top_5_queries(n=5):
+def get_top_5_queries(n: int = 5) -> List[Dict[str, Any]]:
     """
-    Retrieve top n queries grouped by type and query string.
+    Retrieve the top n most frequent queries from MongoDB logs, grouped by query type and string.
+
+    Args:
+        n (int): Number of top queries to retrieve. Defaults to 5.
+
+    Returns:
+        List[Dict[str, Any]]: A list of documents with fields:
+            - '_id': {'query_type': str, 'query_str': str}
+            - 'count': int (number of occurrences)
+            - 'last_query': datetime (timestamp of last query)
     """
     if collection is None:
         logger.warning("MongoDB is not connected — cannot get top queries")
@@ -52,21 +79,3 @@ def get_top_5_queries(n=5):
     except Exception as e:
         logger.error(f"Error retrieving top queries: {e}")
         return []
-
-
-def print_top_5_queries(top_queries):
-    """
-    Print formatted top queries to console.
-    """
-    if not top_queries:
-        print("No queries found.")
-        return
-
-    print("Top 5 most popular search queries:\n")
-    for i, item in enumerate(top_queries, 1):
-        qtype = item['_id']['query_type']
-        qstr = item['_id']['query_str']
-        count = item['count']
-        print(f"{i}. Query type: {qtype}")
-        print(f"   Keyword: \"{qstr}\"")
-        
