@@ -43,7 +43,7 @@ DATABASE_MONGO = (
 )
 
 
-#Limit for the number of movies returned per query
+# Limit for the number of movies returned per query
 MOVIE_RESULT_LIMIT = 10
 
 
@@ -104,7 +104,7 @@ def get_mongo_collection(client: MongoClient) -> Collection | None:
     return None
 
 
-#establish connections on module import
+# establish connections on module import
 try:
     mysql_connection = connect_mysql()
 except ConnectionError as e:

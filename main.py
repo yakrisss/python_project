@@ -71,7 +71,7 @@ def main() -> None:
                     ui.show_top_searches(top_searches)
 
                 case 0:
-                    ui.show_message("Exiting the program")
+                    ui.show_message("Goodbye")
                     break
 
                 case _:
@@ -147,7 +147,6 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
 
     except ui.UserExit:
         ui.show_message("Returning to previous menu...")
-        # Возврат в меню поиска фильмов
         return
 
 if __name__ == "__main__":
