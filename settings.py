@@ -19,7 +19,6 @@ from pymongo.collection import Collection
 
 
 load_dotenv()
-
 logger = logging.getLogger(__name__)
 
 

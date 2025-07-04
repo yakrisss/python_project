@@ -12,14 +12,14 @@ Depends on settings.mongo_collection and logging.
 
 import logging
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
-import settings # application configuration and DB connection settings
+from pymongo.errors import PyMongoError
+
+import settings
 
 
 logger = logging.getLogger(__name__)
-
-
 collection = settings.mongo_collection
 
 
@@ -42,9 +42,9 @@ def log_create(query_type: str, query_str: str) -> None:
     }
     try:
         collection.insert_one(doc)
-        logger.info(f"Log created for query_type={query_type}, query_str={query_str}")
-    except Exception as e:
-        logger.error(f"Error writing log to MongoDB: {e}")
+        logger.info("Log created for query_type=%s, query_str=%s", query_type, query_str)
+    except PyMongoError as e:
+        logger.error("Some error happened: %s", e)
 
 
 def get_top_5_queries(n: int = 5) -> List[Dict[str, Any]]:
@@ -76,6 +76,6 @@ def get_top_5_queries(n: int = 5) -> List[Dict[str, Any]]:
 
     try:
         return list(collection.aggregate(pipeline))
-    except Exception as e:
-        logger.error(f"Error retrieving top queries: {e}")
+    except PyMongoError as e:
+        logger.error("Error happened: %s", e)
         return []

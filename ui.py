@@ -102,7 +102,10 @@ def film_name() -> str:
 
 def actor_name() -> str:
     """Prompt for actor name or part of it."""
-    return input_text("Enter full or partial name of actor or actress (or 0 for back to previous menu): ")
+    return input_text(
+    "Enter full or partial name of actor or actress "
+    "(or 0 for back to previous menu): "
+)
 
 
 def description_text() -> str:
@@ -265,4 +268,3 @@ def show_message(message: str) -> None:
         message (str): The message to print.
     """
     print(message)
-

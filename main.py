@@ -8,12 +8,13 @@ Main application module to manage movie search and logging functionality.
 - Handles graceful exits, resource cleanup, and logs errors/information.
 """
 
+import pymysql
 
-import settings  # application configuration and DB connection settings
-import db        # database abstraction layer (MovieDB class)
-import ui        # user interface functions for input/output
-import logger    # custom logging utility
-import mongo_log # functions to log search activity into MongoDB
+import settings
+import db
+import ui
+import logger
+import mongo_log
 
 
 logger = logger.get_logger(__name__)
@@ -36,9 +37,9 @@ def main() -> None:
     mysql_cursor = None
     try:
         mysql_cursor = mysql_conn.cursor()
-    except Exception as e:
-        ui.show_message(f"Failed to get MySQL cursor: {e}")
-        logger.error(f"Failed to get MySQL cursor: {e}")
+    except (pymysql.MySQLError, ui.UserExit) as e:
+        ui.show_message(f"Unexpected error: {e}")
+        logger.error("Unexpected error: %s", e)
         return
 
     mongo_client = settings.mongo_client
@@ -77,10 +78,10 @@ def main() -> None:
                 case _:
                     ui.show_message("Invalid choice")
 
-    except Exception as e:
+    except (pymysql.MySQLError, ui.UserExit) as e:
         ui.show_message(f"Unexpected error: {e}")
-        logger.error(f"Unexpected error: {e}")
-        
+        logger.error("Unexpected error: %s", e)
+
     finally:
         # Ensure all connections are closed properly on exit
         if mysql_cursor is not None:
@@ -114,8 +115,6 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
         match movie_choice:
             case 1:
                 name = ui.film_name()
-                if name is None:
-                    raise ui.UserExit()
                 ui.paginate_query(movie_db.search_film_by_name, name)
 
             case 2:
@@ -133,8 +132,6 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
             case 4:
                 genres = movie_db.query_all_genres()
                 genre = ui.prompt_genre_choice(genres)
-                if genre is None:
-                    raise ui.UserExit()
 
                 year_min, year_max = movie_db.query_min_max_year()
                 ui.show_year_range(year_min, year_max)
@@ -147,8 +144,6 @@ def handle_movie_search(movie_db: db.MovieDB) -> None:
 
     except ui.UserExit:
         ui.show_message("Returning to previous menu...")
-        return
 
 if __name__ == "__main__":
     main()
-    

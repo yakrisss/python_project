@@ -10,10 +10,10 @@ from typing import Optional, Dict, Tuple, List, Any
 
 import pymysql
 
-from logger import get_logger  # custom logging utility
-import settings  # application configuration and DB connection settings
-import sql_queries  # predefined SQL query strings
-import mongo_log  # functions to log search activity into MongoDB
+from logger import get_logger
+import settings
+import sql_queries
+import mongo_log
 
 
 logger = get_logger(__name__)
@@ -65,7 +65,7 @@ class MovieDB:
             result = self.cursor.fetchall()
             logger.debug("Query executed successfully, fetched %d rows", len(result))
             return result
-        except Exception as e:
+        except pymysql.MySQLError as e:
             logger.error("Error executing query: %s; Exception: %s", query, e)
             return []
 
